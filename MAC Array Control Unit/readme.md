@@ -36,4 +36,6 @@ In the CLEAR state, a pulse is generated to clear the accumulators for all the M
 
 ## Simulation
 
-A simulation was conducted for a Neural Network with 3 layers and a network topology of (4:2:1) neurons per layer and the observed results matched the expected results.
+A simulation was conducted for a Neural Network with 3 layers and a network topology of (4:2:1) neurons per layer and the 2 input features for simplicity .The observed waveforms(generated parameter and activation addresses) matched the expected waveforms.
+
+![Vivado Simulation](images/simulation.png)

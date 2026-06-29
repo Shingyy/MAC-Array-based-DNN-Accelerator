@@ -1,50 +1,39 @@
-# MAC Array Control Unit — Neural Network Accelerator (Basys3 FPGA)
-
-> Day 4 of building a Neural Network Accelerator on the Basys3 FPGA using VHDL on Vivado.
-
----
+# MAC Array Control Unit
 
 ## Overview
 
-The MAC Array Control Unit is a Finite State Machine (FSM) that orchestrates all memory accesses and computation scheduling for a MAC (Multiply-Accumulate) array. It drives three counters:
+The MAC Array Control Unit (MACU) is a FSM with 5 states, IDLE, FETCH, COMPUTE, STORE AND CLEAR .It drives 3 counters, the Distribution Counter, the Activations Counter and the Parameters Counter.
 
-- **Distribution Counter** — generates parameter destination addresses (Parameter Buffers) and activation source addresses (Activations Buffer)
-- **Parameters Counter** — generates parameter source addresses (Parameter BRAM)
-- **Activations Counter** — generates activation destination addresses (Activations BRAM)
+## State Transitions
 
----
+### MACU State Diagram
 
-## FSM States
+![MACU State Diagram](images/macu_state.png)
 
-### `IDLE`
-Held here on reset (`START = 0`). Transitions to `FETCH` on a `START = 1` pulse.
+### Serial MAC Unit Cycle through different states
 
-### `FETCH`
-Fetches parameters from Parameter BRAM into the Parameter Buffer. Distribution Counter and Parameters Counter are initiated. Transitions to `COMPUTE` once the Parameter Buffer is full.
+![Serial MAC Unit Timing Diagram](images/timing_diagram.png)
 
-### `COMPUTE`
-Generates a compute enable pulse for the MAC units. Transitions back to `FETCH` if there are remaining parameters for the current layer, or to `STORE` if all parameters have been fetched.
+### IDLE State
 
-### `STORE`
-Transfers activations from the Activations Buffer to Activations BRAM. Transitions to `CLEAR` once the Activations Buffer is empty.
+Initially the FSM is held in the IDLE state, when a START(Input Buffer FULL flag) pulse is detected it switches to the FETCH state.
 
-### `CLEAR`
-Clears the accumulators of all MAC units. Transitions to `IDLE` if the current layer is the output layer, or back to `FETCH` for the next layer otherwise.
+### FETCH State
 
----
+Once in the FETCH state, it fetches the parameters from the Parameter BRAM to the Parameter Buffer. The Distribution counter and the Parameters counter are both initiated. In this state the Distribution counter generates the parameters destination address(Parameters Buffer) whilst the parameters counter generates the Parameters source address (Parameter BRAM). Once the Parameter Buffer is full it switches to the COMPUTE state.
 
-## Simulation & Verification
+### COMPUTE State
 
-Behavioural simulation conducted for a 3-layer network with topology **(4 : 2 : 1)** neurons. Observed results matched expected results.
+In the COMPUTE State ,a compute enable pulse is generated for the MAC units computation to start. It also determines if there is any more parameters for the current layer and if yes , it switches back to FETCH state and the whole process repeats again. However if all the parameters for the neurons in the present layer have been fetched it switches to the STORE state.
 
----
+### STORE State
 
-## Tools
+In the STORE state, activations are transfered from the Activations Buffer and stored in the Activations FIFO . The Distribution counter is initiated again but to generate the activations source address(Activations Buffer). The Activations counter is also initiated to generate the activations destination address. Once the Activation Buffer is empty , it switches to the CLEAR state.
 
-| Tool | Details |
-|---|---|
-| Language | VHDL |
-| IDE | Vivado |
-| Target board | Basys3 FPGA |
+### CLEAR State
 
----
+In the CLEAR state, a pulse is generated to clear the accumulators for all the MAC units. If the current layer is an output layer, the FSM switches back to IDLE but if not ,the FSM switches back to FETCH and entire cycle repeats again for the next layer.
+
+## Simulation
+
+A simulation was conducted for a Neural Network with 3 layers and a network topology of (4:2:1) neurons per layer and the observed results matched the expected results.

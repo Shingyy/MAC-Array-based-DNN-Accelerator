@@ -2,6 +2,8 @@
 
 ## Demo Video (Running inference for a Speech Recognition Model for digits 0 to 9.)
 
+https://github.com/user-attachments/assets/46defe75-cb00-46fe-894a-67eb88ba54c3
+
 ![Demo (Running inference for a Speech Recognition Model for digits 0 to 9.)](docs/videos/my_demo.mp4)
 
 ## Overview

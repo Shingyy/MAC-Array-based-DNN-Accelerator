@@ -2,7 +2,7 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 
-entity param_bram is
+entity parameter_bram is
     generic(
         N: integer:= 8;-- BRAM width
         K: integer:= 10-- 2^K BRAM depth
@@ -13,12 +13,12 @@ entity param_bram is
         CLK: in std_logic;
         CLR: in std_logic
     );
-end entity param_bram;
+end entity parameter_bram;
 
-architecture rtl of param_bram is
+architecture rtl of parameter_bram is
     
 begin
-   single_port_bram_obj: entity work.single_port_bram
+   param_mem_bram_obj: entity work.param_mem_bram
    generic map(
         N=> N,
         K=> K

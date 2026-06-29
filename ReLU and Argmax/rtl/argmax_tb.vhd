@@ -7,12 +7,12 @@ end entity argmax_tb;
 
 architecture rtl of argmax_tb is
     signal RESET,CLK: std_logic;
-    signal ACCUMULATIONS: signed(31 downto 0);
-    signal ACTIVATIONS: std_logic_vector(3 downto 0);
+    signal ACCUMULATIONS: signed(79 downto 0);
+    signal ACTIVATIONS: std_logic_vector(9 downto 0);
 begin
     argmax_obj: entity work.argmax
     generic map(
-        M=> 4
+        M=> 10
     )
     port map(
         RESET=> RESET,
@@ -34,27 +34,7 @@ begin
         RESET<= '1';
         wait for 20ns;
         RESET<= '0';
-        ACCUMULATIONS<= X"01352011";
-        wait for 200ns;
-        RESET<= '1';
-        wait for 20ns;
-        RESET<= '0';
-        ACCUMULATIONS<= X"21355811";
-        wait for 200ns;
-        RESET<= '1';
-        wait for 20ns;
-        RESET<= '0';
-        ACCUMULATIONS<= X"69355811";
-        wait for 200ns;
-        RESET<= '1';
-        wait for 20ns;
-        RESET<= '0';
-        ACCUMULATIONS<= X"21355891";
-        wait for 200ns;
-        RESET<= '1';
-        wait for 20ns;
-        RESET<= '0';
-        ACCUMULATIONS<= X"71350011";
+        ACCUMULATIONS<= X"bbe70223ece8e2ddb9f1";
         wait ;
     end process;
     

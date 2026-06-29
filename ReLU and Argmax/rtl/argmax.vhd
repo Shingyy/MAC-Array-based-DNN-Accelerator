@@ -16,7 +16,7 @@ entity argmax is
 end entity argmax;
 
 architecture rtl of argmax is
-    signal prev: signed(N-1 downto 0):= (others=> '0');
+    signal prev: signed(N-1 downto 0):= to_signed(0, N);
     signal argmax_index, i: unsigned(7 downto 0):= (others=> '0');
 begin
     argmax_proc: process (CLK)

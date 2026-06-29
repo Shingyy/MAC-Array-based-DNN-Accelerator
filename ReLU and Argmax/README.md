@@ -2,7 +2,7 @@
 
 ## Overview
 
-![Overview](images/relu%20and%20argmax.png)
+![Overview](images/relu_and_argmax.png)
 
 ### Argmax Activation Function (Batch Argmax Function)
 

@@ -1,8 +1,8 @@
 # MAC Array based Deep Neural Network Accelerator
 
-## Demo (Running inference for a Speech Recognition Model for digits 0 to 9.)
+## Demo Video (Running inference for a Speech Recognition Model for digits 0 to 9.)
 
-![Demo (Running inference for a Speech Recognition Model for digits 0 to 9.)](docs/videos/demo.mp4)
+![Demo (Running inference for a Speech Recognition Model for digits 0 to 9.)](docs/videos/my_demo.mp4)
 
 ## Overview
 

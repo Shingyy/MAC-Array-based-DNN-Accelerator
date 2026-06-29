@@ -1,5 +1,9 @@
 # MAC Array based Deep Neural Network Accelerator
 
+## Demo (Running inference for a Speech Recognition Model for digits 0 to 9.)
+
+![Demo (Running inference for a Speech Recognition Model for digits 0 to 9.)](docs/videos/demo.mp4)
+
 ## Overview
 
 After months of dedication and hardwork I'm happy to say that I have finally completed the MAC Array Based Neural Network Accelerator using VHDL on Vivado from scratch(No HLS). 

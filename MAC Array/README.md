@@ -42,4 +42,12 @@ However this also introduces a potential overflow problem as some accumulations 
 
 ## Simulation
 
-I ran behavioral simulations for a 4 MAC Array (K= 2) before and after quantization with the same set of parameters and input features in hexadecimal using Vivado and the results matched the expected outcome. 
+I ran behavioral simulations for a 4 MAC Array (K= 2) before and after requantization with the same set of parameters and input features in hexadecimal using Vivado and the results matched the expected outcome. 
+
+### Before Requantization
+
+![Vivado Simulation](images/mac_array.png)
+
+### After Requantization
+
+![Vivado Simulation](images/mac_array_requantized.png)

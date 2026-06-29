@@ -22,7 +22,7 @@ where w is the weight vector, x is the input vector and b is the bias.
 
 ## Serial MAC Unit timing diagram
 
-![Serial MAC Unit Timing Diagram](Custom-DNN-Accelerator/docs/timing.png)
+![Serial MAC Unit Timing Diagram](images/timing_diagram.png)
 
 ## Fixed-Point Arithmetic
 

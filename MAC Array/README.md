@@ -6,7 +6,7 @@ The MAC array consists of Serial MAC units running computations concurrently. Ea
 
 ## Serial MAC Unit
 
-A MAC (Multiply-Accumulate) unit consists of a multiplier, adder, and accumulator register. It does the basic computation every clock cycle:
+A MAC (Multiply-Accumulate) unit consists of a multiplier, adder and accumulator register. It does the basic computation every clock cycle:
 
 ```
 ACC <= ACC + A•B

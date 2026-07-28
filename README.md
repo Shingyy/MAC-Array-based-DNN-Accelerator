@@ -16,6 +16,10 @@ After months of dedication and hardwork I'm happy to say that I have finally com
 
 ![MAC Array Control Unit (MACU) State Diagram](docs/images/MACU%20State%20Diagram.png)
 
+### DNN Model Parameter Mapping in BRAM
+
+![DNN Model Parameter Mapping in BRAM](docs/images/Memory½20Mapping.png)
+
 ### Timing Diagram for each Serial MAC Unit in a MAC Array
 
 ![Timing Diagram for each Serial MAC Unit in a MAC Array](docs/images/timing%20diagram.png)

@@ -5,7 +5,8 @@ use IEEE.numeric_std.all;
 entity fifo is
     generic(
         N: integer := 8;-- FIFO width
-        X: integer := 3-- 2**X FIFO depth
+        X: integer := 7;-- 2**X FIFO depth
+        J: integer := 1 --  slots left until full 
     );
     port (
         CLK: in std_logic;
@@ -69,8 +70,8 @@ begin
             end if;
         end if;
     end process; 
-    ALMOST_FULL<= '1' when wr_ptr(X-1 downto 0) + 3= rd_ptr(X-1 downto 0) and WRE= '1' else '0'; 
-    ALMOST_EMPTY<= '1' when wr_ptr(X-1 downto 0) = rd_ptr(X-1 downto 0) + 3  and RE= '1' else '0';
+    ALMOST_FULL<= '1' when wr_ptr(X-1 downto 0) + J= rd_ptr(X-1 downto 0) and WRE= '1' else '0'; 
+    ALMOST_EMPTY<= '1' when wr_ptr(X-1 downto 0) = rd_ptr(X-1 downto 0) + J  and RE= '1' else '0';
     FULL<= '1' when  rd_ptr= to_unsigned(2**X,X+1) and wr_ptr= to_unsigned(0,X+1) else 
            '1' when wr_ptr= to_unsigned(2**X,X+1) and rd_ptr= to_unsigned(0,X+1) else   
            '0';

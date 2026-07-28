@@ -18,7 +18,7 @@ After months of dedication and hardwork I'm happy to say that I have finally com
 
 ### DNN Model Parameter Mapping in BRAM
 
-![DNN Model Parameter Mapping in BRAM](docs/images/Memory½20Mapping.png)
+![DNN Model Parameter Mapping in BRAM](docs/images/Memory_Mapping.png)
 
 ### Timing Diagram for each Serial MAC Unit in a MAC Array
 

@@ -10,6 +10,6 @@ It consists of a parameterized Demultiplexer(K to 2^K decoder) and an array of b
 
 ## Simulation
 
-I have attached the simulation results and RTL schematic for a 4 -MAC Array Parameter Buffer with a 2 to 4 (K= 2)DEMUX and 4 buffer registers below.
+I have attached the simulation results for a 4 -MAC Array Parameter Buffer with a 2 to 4 (K= 2)DEMUX and 4 buffer registers below.
 
 ![Vivado Simulation](images/sim.png)

@@ -10,6 +10,11 @@ architecture rtl of fifo_tb is
     signal D_IN, D_OUT: signed(7 downto 0);
 begin
     my_fifo_obj: entity work.fifo
+    generic map(
+        N=> 8,
+        X=> 3,
+        J=> 3
+    )
     port map(
         CLK=> CLK,
         EMPTY=> EMPTY,
@@ -19,18 +24,19 @@ begin
         ALMOST_FULL=> ALMOST_FULL,
         WRE=> WRE,
         RE=> RE,
-        RE_IICK=> RE_TICK,
+        RE_TICK=> RE_TICK,
         WRE_TICK=>WRE_TICK,
         D_IN=> D_IN,
         D_OUT=> D_OUT
     );
     clock_divider: entity work.clock_divider
     generic map(
-        WRITE_CYCLES=> 1, --100MHz
-        READ_CYCLES=> 2 --50MHz
+        WRITE_CYCLES=> 0, --100MHz
+        READ_CYCLES=> 1 --50MHz
     )
     port map(
         CLK=> CLK,
+        RESET=> RESET,
         WRE_TICK=> WRE_TICK,
         RE_TICK=> RE_TICK
     );
@@ -38,9 +44,9 @@ begin
     clkA_proc: process
     begin
         loop 
-            CLK_A<='0';
+            CLK<='0';
             wait for 5ns;
-            CLK_A<= '1';
+            CLK<= '1';
             wait for 5ns;
         end loop;
     end process;
@@ -54,6 +60,7 @@ begin
         WRE<= '1';
         RE<= '0';
         RESET<= '0';
+        wait for 10ns;
         D_IN<= X"01";
         wait for 10ns;
         WRE<= '1';

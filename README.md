@@ -4,6 +4,10 @@
 
 https://github.com/user-attachments/assets/8f4f3eae-c4a3-4951-a84a-d396e1ab18dc
 
+## Demo Video (Running inference for an Image Classification Model for Cats vs Dogs.)
+
+https://github.com/user-attachments/assets/0d62c155-16aa-455d-9f80-87d006ff4693
+
 ## Overview
 
 After months of dedication and hardwork I'm happy to say that I have finally completed the MAC Array Based Neural Network Accelerator using VHDL on Vivado from scratch(No HLS). 

@@ -4,14 +4,16 @@ use IEEE.numeric_std.all;
 
 entity dnn_accelerator is
      generic(
-        Input_vector_length: integer:= 2;
+        input_vector_length: integer:= 64;
         N: integer:= 8;--bit width
         K: integer:= 6;-- 2**K MAC units
         X: integer:= 13;-- Parameter BRAM depth
         N_layers: integer := 3;-- number of layers
         L1: integer:= 64;-- number of neurons for 1st layer
         L2: integer:= 32; -- number of layers for 2nd layer
-        L3: integer:= 10;-- number of neurons for output layer 
+        L3: integer:= 10;-- number of neurons for 3rd layer
+        L4: integer:= 0; -- number of neurons for 4th layer
+        L5: integer:= 0; -- number of neurons for output layer
         bram_depth: integer:= 13;
         fifo_depth: integer:= 6;
         WRITE_CYCLES: integer:= 8860
@@ -38,12 +40,14 @@ architecture rtl of dnn_accelerator is
     signal DATABUSES: signed(2*N-1 downto 0);
     signal ACCUMMULATIONS_OUT: signed(2**(K+1) *N-1 downto 0);
     signal ACTVNS_OUT: signed(2**K *N-1 downto 0);
-    signal ARGMAX_OUT: std_logic_vector(L3-1 downto 0);
-    signal TO_BCD_ENC: std_logic_vector(3 downto 0);
     signal locked_sig, clk_85MHz, reset_gate: std_logic;
+    signal activation_out_reg, fifo_out_reg: signed(N-1 downto 0);
+    signal demux_reg: signed(2**(K+1) *N-1 downto 0);
+    signal ARGMAX_OUT: std_logic_vector(L3-1 downto 0);
+    signal MUX_OUT: std_logic_vector(3 downto 0);
 begin
-    DATABUSES(2*N-1 downto N)<= FIFO_OUT;
-    DATABUSES(N-1 downto 0)<= ACTIVATION_OUT;
+    DATABUSES(2*N-1 downto N)<= fifo_out_reg;
+    DATABUSES(N-1 downto 0)<= activation_out_reg;
     reset_gate<= not(locked_sig) or RESET ;
     clk_wiz_inst : entity work.clk_wiz_0
     port map (
@@ -52,16 +56,40 @@ begin
         reset    => '0',
         locked   => locked_sig
     );
+    
+    ten_to_4_mux: entity work.ten_to_4_mux
+    port map(
+        D_IN=> ARGMAX_OUT,
+        D_OUT=> MUX_OUT
+    );
+    bcd_7seg_dec: entity work.bcd_7seg_dec
+    port map(
+        BIN_IN=> MUX_OUT,
+        LED_IN=> DIGIT_DISPLAY
+    );
+    registers: process(clk_85MHz) is
+    begin
+        if rising_edge(clk_85MHz) then
+            if reset_gate= '0' then
+                activation_out_reg<= ACTIVATION_OUT;
+                fifo_out_reg<= FIFO_OUT;
+                demux_reg<= ACCUMMULATIONS_OUT;
+            else
+                activation_out_reg<= (others=>'0');
+                fifo_out_reg<= (others=>'0');
+            end if;
+        end if;
+    end process;
     relu_block: entity work.relu_block
     generic map(
         N=> N,
         K=> K
     )
     port map(
-        ACCS=> ACCUMMULATIONS_OUT(2**K*N-1 downto 0),
+        ACCS=> demux_reg(2**K*N-1 downto 0),
         ACTIVATIONS_OUT=> ACTVNS_OUT
     );
-    argmax: entity work.argmax
+    argmax: entity work.batch_argmax
     generic map(
         N=> N,
         M=> L3-- number of neurons in the output layer
@@ -70,18 +98,9 @@ begin
         CLK=> clk_85MHz,
         RESET=> reset_gate,
         ACCS=> ACCUMMULATIONS_OUT(2**K*N + L3*N -1 downto 2**K* N),
-        ACTIVATIONS=> ARGMAX_OUT
+        ARGMAX_OUT=> ARGMAX_OUT
     );
-    ten_to_4_mux: entity work.ten_to_4_mux
-    port map(
-        D_IN=> ARGMAX_OUT,
-        D_OUT=> TO_BCD_ENC
-    );
-    bcd_7seg_dec: entity work.bcd_7seg_dec
-    port map(
-        BIN_IN=> TO_BCD_ENC,
-        LED_IN=>DIGIT_DISPLAY
-    );
+
     accum_demux: entity work.accum_demux
     generic map(
         N=> N,
@@ -145,14 +164,17 @@ begin
     );
     mac_control_unit: entity work.mac_control_unit
     generic map(
-        Input_vector_length=> 2,-- X_IN should be a 2-vector
+        input_vector_length=> input_vector_length,-- X_IN should be a 2-vector
         N=> N,--bit width
         K=> K,-- 2**K MAC units
         X=> X,-- Parameter BRAM Address bit width
         N_layers=> N_layers,-- number of layers
         L1=> L1,-- number of neurons for 1st layer
         L2=> L2, -- number of layers for 2nd layer
-        L3=> L3-- number of neurons for output layer 
+        L3=> L3,-- number of neurons for output layer 
+        --inactive layers
+        L4=> L4,
+        L5=> L5
     )
     port map(
         CLK=> clk_85MHz,
@@ -207,6 +229,7 @@ begin
         RX_DONE=> RX_DONE,
         EMPTY=> EMPTY,
         WRE=> WRE,
+        RX_OUT=> open,
         RE=> RE,
         RE_TICK=> COMPUTE_EN,
         RX_IN=> RX_IN,

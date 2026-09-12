@@ -4,14 +4,16 @@ use IEEE.numeric_std.all;
 
 entity mac_control_unit is
     generic(
-        Input_vector_length: integer:= 2;
+        input_vector_length: integer:= 2;
         N: integer:= 8;--bit width
         K: integer:= 3;-- 2**K MAC units
         X: integer:= 10;-- Parameter BRAM Address bit width
-        N_layers: integer := 3;-- number of layers
-        L1: integer:= 5;-- number of neurons for 1st layer
-        L2: integer:= 4; -- number of layers for 2nd layer
-        L3: integer:= 3-- number of neurons for output layer 
+        N_layers: integer := 5;-- number of layers
+        L1: integer:= 6;-- number of neurons for 1st layer
+        L2: integer:= 5; -- number of layers for 2nd layer
+        L3: integer:= 4;-- number of neurons for 3rd layer 
+        L4: integer:= 3;-- number of neurons for 4th layer
+        L5: integer:= 2-- number of neurons for output layer  
     );
     port (
         CLK: in std_logic;
@@ -37,29 +39,33 @@ architecture rtl of mac_control_unit is
     signal dist_counter: unsigned(K-1 downto 0);-- distribution counter
     signal param_counter: unsigned(X-1 downto 0);
     signal compute_cycle: unsigned(X-1 downto 0);
-    signal layer: unsigned(1 downto 0);--current layer being computed
+    signal layer: unsigned(2 downto 0);--current layer being computed
     signal activation_en,param_en: std_logic;--enabling distribution counter to either param DEMUX or Activation MUX 
     type STATES is (IDLE, FETCH, COMPUTE, STORE, CLEAR);
     signal current_state : STATES;
     signal param_delay: std_logic;
     signal base_addr: unsigned(X-1 downto 0);
     signal activation_delay: unsigned(1 downto 0);
-    type neural_network is array(0 to 2) of unsigned(K downto 0);
-    type activations is array(0 to 2) of unsigned(X-1 downto 0);
+    type neural_network is array(0 to 4) of unsigned(K downto 0);
+    type activations is array(0 to 4) of unsigned(X-1 downto 0);
     constant activation_structure: activations:= (
-        0=> to_unsigned(Input_vector_length,X),
+        0=> to_unsigned(input_vector_length,X),
         1=> to_unsigned(L1,X),
-        2=> to_unsigned(L2, X)
+        2=> to_unsigned(L2, X),
+        3=> to_unsigned(L3,X),
+        4=> to_unsigned(L4,X)
     );
     constant NEURAL_NET_TOPOLOGY: neural_network:= (
         0=> to_unsigned(L1,K+1),
         1=> to_unsigned(L2,K+1),
-        2=> to_unsigned(L3,K+1)
+        2=> to_unsigned(L3,K+1),
+        3=> to_unsigned(L4,K+1),
+        4=> to_unsigned(L5,K+1)
     );
      signal neurons_per_layer: neural_network := NEURAL_NET_TOPOLOGY;
      signal activations_per_layer:activations := activation_structure;
 begin
-    sync_process: process (RESET, CLK) is
+    sync_process: process (CLK) is
     begin
         if rising_edge(CLK) then
             if RESET= '1' then
@@ -67,10 +73,10 @@ begin
                 param_counter<= to_unsigned(0,X);
                 compute_cycle<= to_unsigned(1,X);
                 base_addr<= to_unsigned(1,X);
-                layer<= to_unsigned(0,2);
+                layer<= to_unsigned(0,3);
                 current_state<= IDLE;
                 COMPUTE_EN<= '0';
-                CLR_ACC<= '0';
+                CLR_ACC<= '1';
                 activation_en<= '0';
                 param_en<= '1';
                 param_delay<= '0';
@@ -101,24 +107,28 @@ begin
                         if START= '1' and RX_DONE= '0' then 
                             RE<= '1';--start reading input features from FIFO
                             WRE<= '0';
-                            current_state<= FETCH;
+                            current_state<= FETCH;--move to next state
                         end if;
                     when FETCH =>
                         PARAM_BUFFER_RESET<= '0';
                         CLR_ACC<= '0';
                         COMPUTE_EN<= '0';
                         if dist_counter< neurons_per_layer(to_integer(layer)) -1 then
+                            --add 1 cycle delay to the distribution counter only to account for BRAM 1 cycle read latency
+                            --parameter destination address has to align with the moment the parameter is read from BRAM
                             if param_delay= '1' then
                                 dist_counter <= dist_counter + to_unsigned(1,K);
                             else
                                 param_delay<= '1';
                             end if;
                         --ensure param counter only gets 2**K cycles despite the dist counter delay
+                        --parameter counter keeps running and is not affected by the delay
                             if param_counter< base_addr + (neurons_per_layer(to_integer(layer)) -1 )*(activations_per_layer(to_integer(layer))+1) -1 then 
-                                param_counter<= param_counter+ activations_per_layer(to_integer(layer))+1;
+                            --parameter counter keeps running and is not affected by the delay
+                                param_counter<= param_counter+ activations_per_layer(to_integer(layer))+1; -- jump to the address of the batch parameter of the next neuron
                             end if;
                         else
-                            current_state<= COMPUTE;
+                            current_state<= COMPUTE;-- move to next state
                         end if;    
                     when COMPUTE =>
                         COMPUTE_EN<= '1';
@@ -154,11 +164,11 @@ begin
                             end if;
                         else
                             WRE<= '0';
-                            layer<= layer + to_unsigned(1,2);--setting up next layer transition
+                            layer<= layer + 1;--setting up next layer transition
                             current_state<= CLEAR;
                         end if;
                     when CLEAR=>
-                        if layer< to_unsigned(N_layers,2) then
+                        if layer< to_unsigned(N_layers,3) then
                             CLR_ACC<= '1';
                             compute_cycle<= to_unsigned(1,X);
                             dist_counter<= (others=> '0');
@@ -178,8 +188,8 @@ begin
         end if;
     end process;
     PARAM_SRC<= std_logic_vector(param_counter);
-    PARAM_DEST<= std_logic_vector(dist_counter) when param_en='1' else (others=> 'Z');
-    ACTIVATION_SRC<= std_logic_vector(dist_counter) when activation_en='1' else (others=> 'Z');
-    OL<= '1' when layer> to_unsigned(N_layers-1, 2) else  '0' ;--output layer flag
-    IL<= '1' when layer= to_unsigned(0,2) else '0';--input layer flag
+    PARAM_DEST<= std_logic_vector(dist_counter) when param_en='1' else (others=> '0');
+    ACTIVATION_SRC<= std_logic_vector(dist_counter) when activation_en='1' else (others=> '0');
+    OL<= '1' when layer> to_unsigned(N_layers-1, 3) else  '0' ;--output layer flag
+    IL<= '1' when layer= to_unsigned(0,3) else '0';--input layer flag
 end architecture rtl;

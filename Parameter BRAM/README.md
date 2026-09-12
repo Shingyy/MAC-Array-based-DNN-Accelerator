@@ -6,7 +6,7 @@ The Parameter BRAM stores all the trained model parameters including the biases 
 It was implemented using the Xilinx Block Memory Generator IP, which provides an efficient solution for storing the model parameters and enables 
 single-cycle memory access during inference.
 
-##DNN Model Parameter Mapping in BRAM
+## DNN Model Parameter Mapping in BRAM
 
 ![DNN Model Parameter Mapping in BRAM](images/Memory_Mapping.png)
 

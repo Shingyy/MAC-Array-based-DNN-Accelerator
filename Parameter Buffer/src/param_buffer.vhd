@@ -8,11 +8,11 @@ entity param_buffer is
         K: integer:= 2--number of bits for DEMUX selector
     );
     port (
-        PARAM_IN: in std_logic_vector(N-1 downto 0);
-        ADDR: in unsigned(K-1 downto 0);
+        PARAM_IN: in std_logic_vector(N-1 downto 0);-- parameters in
+        ADDR: in std_logic_vector(K-1 downto 0);-- parameter buffer register address
         RESET: in std_logic;
-        CLK: in std_logic;
-        PARAMS_OUT: out std_logic_vector((2**K * N)-1 downto 0)
+        CLK: in std_logic;--clock
+        PARAMS_OUT: out std_logic_vector((2**K * N)-1 downto 0)--parameters out
     );
 end entity param_buffer;
 
@@ -21,25 +21,25 @@ architecture rtl of param_buffer is
 begin
     my_demux: entity work.demux
     generic map(
-        N=> K
+        N=> K --number of bits for the DeMUX Selector
     )
     port map(
-        SEL=> ADDR,
+        SEL=> ADDR,-- DeMUX selector
         RESET=> RESET,
-        DEMUX_OUT=> demux_out
+        DEMUX_OUT=> demux_out-- DeMUX output
     );
+    -- Instantiate 2**K buffer registers 
     my_buffer_registers: for i in 0 to 2**K -1 generate
         buffer_register: entity work.buffer_reg
         generic map(
-            N=> N
+            N=> N --buffer register bitwidth
         )
         port map(
             D=> PARAM_IN,
             CLK=> CLK,
             R=> RESET,
-            WR_EN=> demux_out(i),
+            WR_EN=> demux_out(i),-- Write Enable signal connected to a DeMUX output dataline 
             Q=> PARAMS_OUT(N*(i+1) -1 downto N*i)
         );
     end generate;
-    
 end architecture rtl;

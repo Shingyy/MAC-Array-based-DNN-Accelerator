@@ -52,5 +52,7 @@ begin
             end if;
         end loop;
     end process;
-    ARGMAX_OUT<= std_logic_vector(to_unsigned(1,M)) when ARG_INDEX= to_unsigned(0,M-1)or RESET= '1' or ACCS= to_signed(0,N*M) else argmax;             
+    ARGMAX_OUT<= std_logic_vector(to_unsigned(1,M)) when ARG_INDEX= to_unsigned(0,M-1) else
+                 (others=>'0') when ACCS= to_signed(0,N*M)or RESET= '1' else
+                 argmax;             
 end architecture rtl;

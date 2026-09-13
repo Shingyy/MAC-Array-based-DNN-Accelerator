@@ -21,11 +21,11 @@ begin
     baud_generate: process (MODE) is
         begin
           case MODE is 
-            when "00" => n_cycles<= to_unsigned(20832,15);--4800 baud
-            when "01" => n_cycles<= to_unsigned(10415, 15);--9600 baud
-            when "10" => n_cycles<= to_unsigned(5207, 15);--19200 baud
-            when "11" => n_cycles<= to_unsigned(2603, 15);-- 38400 baud
-            when others => n_cycles<= to_unsigned(20832, 15);
+            when "00" => n_cycles<= to_unsigned(17708,15);--4800 baud
+            when "01" => n_cycles<= to_unsigned(8854, 15);--9600 baud
+            when "10" => n_cycles<= to_unsigned(4427, 15);--19200 baud
+            when "11" => n_cycles<= to_unsigned(2213, 15);-- 38400 baud
+            when others => n_cycles<= to_unsigned(20833, 15);
           end case;  
     end process;
     uart_clk_generate: process (CLK_BAUD, RESET_BAUD) is
